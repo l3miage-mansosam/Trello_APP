@@ -65,7 +65,6 @@ export default defineComponent({
       }
     }
     
-    // Drag and drop functionality
     const onDragStart = (event: DragEvent, cardId: number) => {
       if (event.dataTransfer) {
         event.dataTransfer.effectAllowed = 'move'
@@ -75,7 +74,6 @@ export default defineComponent({
     }
     
     const onDragEnd = () => {
-      // Clean up if needed
     }
     
     const onDrop = (event: DragEvent) => {
@@ -86,11 +84,8 @@ export default defineComponent({
         const fromListId = parseInt(event.dataTransfer.getData('fromListId'))
         const toListId = props.list.id
         
-        // Calculate the drop index based on the position
-        // For simplicity, we'll just append to the end of the list
         const newIndex = props.list.cards.length
         
-        // Only emit if we're actually moving between lists or positions
         if (fromListId !== toListId || newIndex !== props.list.cards.findIndex(c => c.id === cardId)) {
           emit('move-card', cardId, fromListId, toListId, newIndex)
         }

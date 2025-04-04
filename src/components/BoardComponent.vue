@@ -64,7 +64,6 @@ export default defineComponent({
     const newListTitle = ref('')
     const newListInput = ref<HTMLInputElement | null>(null)
     
-    // Create a copy of the board to work with
     const boardCopy = computed(() => {
       return JSON.parse(JSON.stringify(props.board))
     })
@@ -115,25 +114,20 @@ export default defineComponent({
     const moveCard = (cardId: number, fromListId: number, toListId: number, newIndex: number) => {
       const updatedBoard = { ...props.board }
       
-      // Find the source list and card
       const sourceList = updatedBoard.lists.find(l => l.id === fromListId)
       if (!sourceList) return
       
       const cardIndex = sourceList.cards.findIndex(c => c.id === cardId)
       if (cardIndex === -1) return
       
-      // Get the card to move
       const [movedCard] = sourceList.cards.splice(cardIndex, 1)
       
-      // Find the destination list
       const destList = updatedBoard.lists.find(l => l.id === toListId)
       if (!destList) {
-        // If destination list not found, put the card back
         sourceList.cards.splice(cardIndex, 0, movedCard)
         return
       }
       
-      // Insert the card at the new position
       destList.cards.splice(newIndex, 0, movedCard)
       
       emit('update:board', updatedBoard)
@@ -191,7 +185,7 @@ export default defineComponent({
   padding: 20px;
   height: calc(100vh - 60px);
   align-items: flex-start;
-  background-image: url('@/assets/background.jpg'); /* Path to your background image */
+  background-image: url('@/assets/backround.jpg');
   background-size: cover;
   background-position: center;
 }

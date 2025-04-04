@@ -12,7 +12,6 @@
     </div>
   </div>
 
-  <!-- Card Details Modal -->
   <div v-if="showCardDetails" class="modal-backdrop" @click.self="showCardDetails = false">
     <div class="modal-content">
       <div class="modal-header">
