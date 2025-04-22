@@ -51,14 +51,20 @@ export default defineComponent({
     }
   },
   emits: ['dragstart', 'dragend'],
-  setup(props, { emit }) {
+  setup(_, { emit }) {
     const showCardDetails = ref(false)
     
     const onDragStart = (event: DragEvent) => {
+      console.log('Drag started:', { cardId: _.card.id, event })
+      if (event.dataTransfer) {
+        event.dataTransfer.effectAllowed = 'move'
+        event.dataTransfer.setData('application/json', JSON.stringify({ cardId: _.card.id }))
+      }
       emit('dragstart', event)
     }
     
     const onDragEnd = (event: DragEvent) => {
+      console.log('Drag ended:', { cardId: _.card.id, event })
       emit('dragend', event)
     }
 

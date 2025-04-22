@@ -16,7 +16,7 @@
 
 <script lang="ts">
 import { defineComponent, ref, watch, onMounted } from 'vue'
-import { Board, List, Card } from '@/types'
+import { Board, List, Card } from '../types'
 import TemplateBoard from '../components/templates/BoardTemplate.vue'
 
 export default defineComponent({
@@ -28,24 +28,20 @@ export default defineComponent({
     const boards = ref<Board[]>([])
     const currentBoardId = ref<number>(0)
     
-    // Load boards from localStorage
     const loadFromLocalStorage = () => {
       const savedBoards = localStorage.getItem('trello-boards')
       if (savedBoards) {
         boards.value = JSON.parse(savedBoards)
         
-        // Set current board to the first board or the first favorite
         if (boards.value.length > 0) {
           const favoriteBoard = boards.value.find(board => board.isFavorite)
           currentBoardId.value = favoriteBoard ? favoriteBoard.id : boards.value[0].id
         }
       } else {
-        // Create a default board if none exists
         createDefaultBoard()
       }
     }
     
-    // Create a default board
     const createDefaultBoard = () => {
       const defaultBoard: Board = {
         id: 1,
@@ -75,7 +71,7 @@ export default defineComponent({
           }
         ],
         isFavorite: false,
-        createdAt: new Date().toISOString()
+        createdAt: Date.now()
       }
       
       boards.value = [defaultBoard]
@@ -83,17 +79,14 @@ export default defineComponent({
       saveToLocalStorage()
     }
     
-    // Save boards to localStorage
     const saveToLocalStorage = () => {
       localStorage.setItem('trello-boards', JSON.stringify(boards.value))
     }
     
-    // Watch for changes to save to localStorage
     watch(boards, () => {
       saveToLocalStorage()
     }, { deep: true })
     
-    // Board operations
     const createBoard = () => {
       const boardName = prompt('Enter board name:')
       if (boardName && boardName.trim()) {
@@ -108,7 +101,7 @@ export default defineComponent({
             }
           ],
           isFavorite: false,
-          createdAt: new Date().toISOString()
+          createdAt: Date.now()
         }
         
         boards.value.push(newBoard)
@@ -127,7 +120,6 @@ export default defineComponent({
       }
     }
     
-    // List operations
     const addList = ({ boardId, title }: { boardId: number, title: string }) => {
       const board = boards.value.find(b => b.id === boardId)
       if (board) {
@@ -147,7 +139,6 @@ export default defineComponent({
       }
     }
     
-    // Card operations
     const addCard = ({ listId, title }: { listId: number, title: string }) => {
       const board = boards.value.find(b => b.id === currentBoardId.value)
       if (board) {
@@ -189,7 +180,6 @@ export default defineComponent({
     const moveCard = ({ cardId, targetListId, targetIndex }: { cardId: number, targetListId: number, targetIndex: number }) => {
       const board = boards.value.find(b => b.id === currentBoardId.value)
       if (board) {
-        // Find the card and its source list
         let sourceList: List | undefined
         let card: Card | undefined
         
@@ -203,20 +193,17 @@ export default defineComponent({
           }
         }
         
-        // Add the card to the target list
         if (card && sourceList) {
           const targetList = board.lists.find(l => l.id === targetListId)
           if (targetList) {
             targetList.cards.splice(targetIndex, 0, card)
           } else {
-            // If target list not found, put the card back
             sourceList.cards.push(card)
           }
         }
       }
     }
     
-    // Load data on mount
     onMounted(() => {
       loadFromLocalStorage()
     })

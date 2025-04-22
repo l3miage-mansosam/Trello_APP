@@ -15,7 +15,7 @@
     </div>
   </div>
 
-  <!-- Card Details Modal -->
+  
   <molecule-modal
     :id="`card-modal-${card.id}`"
     :title="card.title"
@@ -68,7 +68,7 @@
 
 <script lang="ts">
 import { defineComponent, ref, watch } from 'vue'
-import { Card } from '@/types'
+import { Card } from '../../types'
 import AtomIcon from '../atoms/Icon.vue'
 import AtomButton from '../atoms/Button.vue'
 import MoleculeModal from '../molecules/ModalComponent.vue'
@@ -99,13 +99,12 @@ export default defineComponent({
     const editedTitle = ref(props.card.title)
     const editedDescription = ref(props.card.description)
 
-    // Update edited values when card prop changes
     watch(() => props.card, (newCard) => {
       editedTitle.value = newCard.title
       editedDescription.value = newCard.description
     })
 
-    // Watch for modal visibility
+   
     watch(showCardDetails, (newValue) => {
       if (newValue && cardModal.value) {
         cardModal.value.show()

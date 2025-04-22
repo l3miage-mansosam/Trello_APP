@@ -185,7 +185,7 @@ export default defineComponent({
   padding: 20px;
   height: calc(100vh - 60px);
   align-items: flex-start;
-  background-image: url('@/assets/backround.jpg');
+  background-image: url("/assets/backround.jpg");
   background-size: cover;
   background-position: center;
 }

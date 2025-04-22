@@ -74,7 +74,7 @@
 
 <script lang="ts">
 import { defineComponent, ref, nextTick, watch } from 'vue'
-import { List, Card } from '@/types'
+import { List, Card } from '../../types'
 import AtomButton from '../atoms/Button.vue'
 import AtomIcon from '../atoms/Icon.vue'
 import MoleculeCardHeader from '../molecules/CardHeader.vue'
@@ -100,7 +100,6 @@ export default defineComponent({
     const newCardTitle = ref('')
     const newCardInput = ref<HTMLInputElement | null>(null)
     
-    // For drag and drop
     const draggedCardId = ref<number | null>(null)
     
     const confirmDeleteList = () => {
@@ -116,7 +115,6 @@ export default defineComponent({
           title: newCardTitle.value.trim()
         })
         newCardTitle.value = ''
-        // Keep the form open for adding multiple cards
       }
     }
     
@@ -132,10 +130,8 @@ export default defineComponent({
     }
     
     const onCardDragStart = (event: DragEvent, cardId: number) => {
-      // Set the card ID directly
       draggedCardId.value = cardId
       
-      // Also set it in the dataTransfer object for the drop handler
       if (event.dataTransfer) {
         event.dataTransfer.setData('text/plain', cardId.toString())
       }
@@ -152,13 +148,12 @@ export default defineComponent({
           emit('move-card', {
             cardId,
             targetListId: props.list.id,
-            targetIndex: props.list.cards.length // Add to the end of the list
+            targetIndex: props.list.cards.length
           })
         }
       }
     }
     
-    // Focus the input when the add form is shown
     watch(showAddForm, (newValue) => {
       if (newValue) {
         nextTick(() => {

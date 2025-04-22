@@ -29,7 +29,7 @@
 
 <script lang="ts">
 import { defineComponent, PropType } from 'vue'
-import { Board } from '@/types'
+import { Board } from '../types'
 
 export default defineComponent({
   name: 'NavBar',

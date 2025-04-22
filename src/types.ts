@@ -15,5 +15,5 @@ export interface Board {
   title: string;
   lists: List[];
   isFavorite?: boolean;
-  createdAt: number; // timestamp
+  createdAt: number; 
 }
