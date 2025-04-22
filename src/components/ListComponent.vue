@@ -1,6 +1,8 @@
 <template>
   <div class="list" 
-    @dragover.prevent
+    @dragover.prevent="onDragOver"
+    @dragenter.prevent
+    @dragleave="onDragLeave"
     @drop="onDrop">
     <div class="list-header">
       {{ list.title }}
@@ -9,14 +11,28 @@
       </button>
     </div>
     <div class="list-cards">
-      <CardComponent 
-        v-for="card in list.cards" 
-        :key="card.id" 
-        :card="card"
-        :draggable="true"
-        @dragstart="(event) => onDragStart(event, card.id)"
-        @dragend="onDragEnd"
-      />
+      <div class="card-drop-area" v-if="list.cards.length === 0 && isListDraggedOver" />
+      <div v-for="(card, index) in list.cards" :key="card.id" class="card-wrapper">
+        <div 
+          class="card-drop-indicator"
+          :class="{ 'active': dropTargetIndex === index }"
+          @dragover.prevent="onCardDropAreaOver(index)"
+          @drop="onCardDropAreaDrop(index, $event)"
+        />
+        <CardComponent 
+          :card="card"
+          :draggable="true"
+          @dragstart="(event) => onDragStart(event, card.id)"
+          @dragend="onDragEnd"
+        />
+        <div 
+          v-if="index === list.cards.length - 1"
+          class="card-drop-indicator"
+          :class="{ 'active': dropTargetIndex === list.cards.length }"
+          @dragover.prevent="onCardDropAreaOver(list.cards.length)"
+          @drop="onCardDropAreaDrop(list.cards.length, $event)"
+        />
+      </div>
     </div>
     <div v-if="!showAddCard" @click="showAddCard = true" class="add-card-btn">
       <i class="fas fa-plus"></i> Add a card
@@ -65,31 +81,107 @@ export default defineComponent({
       }
     }
     
+    // For drag and drop
+    const isListDraggedOver = ref(false)
+    const dropTargetIndex = ref(-1)
+    
     const onDragStart = (event: DragEvent, cardId: number) => {
       if (event.dataTransfer) {
         event.dataTransfer.effectAllowed = 'move'
-        event.dataTransfer.setData('cardId', cardId.toString())
-        event.dataTransfer.setData('fromListId', props.list.id.toString())
+        
+        // Store the data as JSON to ensure reliable cross-browser compatibility
+        const dragData = JSON.stringify({
+          cardId,
+          fromListId: props.list.id
+        })
+        
+        event.dataTransfer.setData('application/json', dragData)
+        
+        // Add a class to the body to indicate drag operation is in progress
+        document.body.classList.add('card-dragging')
       }
     }
     
     const onDragEnd = () => {
+      // Reset states
+      isListDraggedOver.value = false
+      dropTargetIndex.value = -1
+      document.body.classList.remove('card-dragging')
+    }
+    
+    const onDragOver = (event: DragEvent) => {
+      event.preventDefault()
+      isListDraggedOver.value = true
+      
+      // Default to end of list if not hovering over a specific drop area
+      if (dropTargetIndex.value === -1) {
+        dropTargetIndex.value = props.list.cards.length
+      }
+    }
+    
+    const onDragLeave = (event: DragEvent) => {
+      // Check if we've actually left the list (not just moved between child elements)
+      const currentTarget = event.currentTarget as HTMLElement
+      if (currentTarget && !currentTarget.contains(event.relatedTarget as Node)) {
+        isListDraggedOver.value = false
+        dropTargetIndex.value = -1
+      }
+    }
+    
+    const onCardDropAreaOver = (index: number) => {
+      dropTargetIndex.value = index
+    }
+    
+    const onCardDropAreaDrop = (index: number, event: DragEvent) => {
+      onDropAtIndex(index, event)
     }
     
     const onDrop = (event: DragEvent) => {
       event.preventDefault()
       
-      if (event.dataTransfer) {
-        const cardId = parseInt(event.dataTransfer.getData('cardId'))
-        const fromListId = parseInt(event.dataTransfer.getData('fromListId'))
+      // If dropping on the list but not on a specific drop area,
+      // default to the end of the list
+      if (dropTargetIndex.value === -1) {
+        onDropAtIndex(props.list.cards.length, event)
+      } else {
+        onDropAtIndex(dropTargetIndex.value, event)
+      }
+    }
+    
+    const onDropAtIndex = (newIndex: number, event: DragEvent) => {
+      if (!event.dataTransfer) return
+      
+      try {
+        // Get the drag data from dataTransfer
+        const jsonData = event.dataTransfer.getData('application/json')
+        if (!jsonData) return
+        
+        const dragData = JSON.parse(jsonData)
+        const cardId = dragData.cardId
+        const fromListId = dragData.fromListId
         const toListId = props.list.id
         
-        const newIndex = props.list.cards.length
+        const cardIndex = props.list.cards.findIndex(c => c.id === cardId)
         
-        if (fromListId !== toListId || newIndex !== props.list.cards.findIndex(c => c.id === cardId)) {
-          emit('move-card', cardId, fromListId, toListId, newIndex)
+        // Handle special case: when dropping in same list at a position after the dragged card
+        if (fromListId === toListId && cardIndex !== -1 && newIndex > cardIndex) {
+          // Adjust the position to account for the removed card
+          newIndex--
         }
+        
+        // Don't move if the card is dropped on itself
+        if (fromListId === toListId && cardIndex === newIndex) {
+          return
+        }
+        
+        emit('move-card', cardId, fromListId, toListId, newIndex)
+      } catch (error) {
+        console.error('Error parsing drag data:', error)
       }
+      
+      // Reset states
+      isListDraggedOver.value = false
+      dropTargetIndex.value = -1
     }
 
     const addCard = () => {
@@ -112,8 +204,14 @@ export default defineComponent({
       newCardInput,
       addCard,
       deleteList,
+      isListDraggedOver,
+      dropTargetIndex,
       onDragStart,
       onDragEnd,
+      onDragOver,
+      onDragLeave,
+      onCardDropAreaOver,
+      onCardDropAreaDrop,
       onDrop
     }
   }
@@ -159,6 +257,42 @@ export default defineComponent({
 
 .list-cards {
   margin-bottom: 10px;
+  min-height: 8px; /* Ensure there's always space to drop into an empty list */
+}
+
+.card-wrapper {
+  position: relative;
+}
+
+.card-drop-area {
+  height: 60px;
+  background-color: rgba(0, 121, 191, 0.15);
+  border-radius: 3px;
+  margin-bottom: 8px;
+  border: 2px dashed rgba(0, 121, 191, 0.3);
+}
+
+.card-drop-indicator {
+  height: 2px;
+  background-color: transparent;
+  margin: 0;
+  transition: height 0.2s ease, background-color 0.2s ease;
+}
+
+.card-drop-indicator.active {
+  height: 8px;
+  background-color: #0079bf;
+  border-radius: 3px;
+  margin: 4px 0;
+}
+
+/* Add styles for dragging state */
+body.card-dragging .list {
+  background-color: #ebecf0;
+}
+
+body.card-dragging .card {
+  cursor: grabbing;
 }
 
 .add-card-btn {
