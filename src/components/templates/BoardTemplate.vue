@@ -160,7 +160,6 @@ export default defineComponent({
 
 .board-content {
   flex: 1;
-  background-color: #f0f2f5;
   padding: 1rem;
   overflow-x: auto;
 }

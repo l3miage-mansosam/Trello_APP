@@ -111,7 +111,6 @@ body {
   max-width: 60%;
   margin: 0 20px;
   scrollbar-width: thin;
-  scrollbar-color: rgba(255, 255, 255, 0.3) transparent;
 }
 
 .navbar-boards::-webkit-scrollbar {
@@ -123,7 +122,6 @@ body {
 }
 
 .navbar-boards::-webkit-scrollbar-thumb {
-  background-color: rgba(255, 255, 255, 0.3);
   border-radius: 10px;
 }
 
