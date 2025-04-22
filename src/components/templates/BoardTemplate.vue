@@ -94,8 +94,8 @@ export default defineComponent({
       default: () => []
     },
     currentBoardId: {
-      type: Number,
-      required: true
+      type: Number as () => number | undefined,
+      required: false
     }
   },
   emits: [
@@ -114,9 +114,10 @@ export default defineComponent({
     const newListTitle = ref('')
     const newListInput = ref<HTMLInputElement | null>(null)
     
-    const currentBoard = computed(() => {
-      return props.boards.find(board => board.id === props.currentBoardId)
-    })
+      const currentBoard = computed(() => {
+        if (props.currentBoardId === undefined) return null
+        return props.boards.find(board => board.id === props.currentBoardId) || null
+      })
     
     const addList = () => {
       if (newListTitle.value.trim()) {
@@ -129,7 +130,6 @@ export default defineComponent({
       }
     }
     
-    // Focus the input when the add form is shown
     watch(showAddListForm, (newValue) => {
       if (newValue) {
         nextTick(() => {
@@ -169,10 +169,19 @@ export default defineComponent({
 }
 
 .board-title {
-  color: #172b4d;
-  font-size: 1.5rem;
-  font-weight: bold;
+  text-align: center;
+  
+  padding-bottom: 0.5rem;
+  padding-left: 5rem;
+  display: flex;
+  align-items: center;
+  color:rgb(236, 238, 242);
+  font-size: 2rem;
+  font-weight: 600;
+  position: relative;
+
 }
+
 
 .board-lists {
   display: flex;

@@ -161,22 +161,19 @@ export default defineComponent({
   font-size: 1.5rem;
 }
 
-.favorite-btn {
-  background: none;
-  border: none;
-  color: #f8d347;
-  font-size: 1.2rem;
-  cursor: pointer;
-  margin-left: 10px;
-  opacity: 0.7;
-}
+
 
 .favorite-btn:hover {
   opacity: 1;
 }
 
-.favorite-btn.is-favorite {
-  opacity: 1;
+.favorite-btn {
+  background-color: transparent;
+  border: none;
+  color: white;
+  font-size: 1.5rem;
+  margin-left: 10px;
+  cursor: pointer;
 }
 
 

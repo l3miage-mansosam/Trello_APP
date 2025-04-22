@@ -131,11 +131,12 @@ export default defineComponent({
       })
       showCardDetails.value = false
     }
+      
 
     const deleteCard = () => {
       if (confirm('Are you sure you want to delete this card?')) {
         emit('delete:card', props.card.id)
-        showCardDetails.value = false
+       showCardDetails.value = false
       }
     }
 

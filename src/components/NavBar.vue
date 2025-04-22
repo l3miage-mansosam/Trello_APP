@@ -1,7 +1,7 @@
 <template>
   <nav class="navbar">
     <div class="navbar-brand">
-      <i class="fab fa-trello"></i> Trello Clone
+      <i class="fab fa-trello"></i> Trello By Me
     </div>
     <div class="navbar-boards">
       <div 
@@ -94,7 +94,7 @@ export default defineComponent({
 }
 
 .board-item {
-  background-color: rgba(255, 255, 255, 0.2);
+  background-color: rgba(251, 240, 240, 0.2);
   color: white;
   padding: 6px 12px;
   border-radius: 3px;
